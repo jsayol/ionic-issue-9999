@@ -1,5 +1,5 @@
 import { Component, ViewChild } from '@angular/core';
-import { Tabs } from "ionic-angular";
+import { Tabs, Tab } from "ionic-angular";
 
 import { HomePage } from '../home/home';
 import { AboutPage } from '../about/about';
@@ -18,9 +18,27 @@ export class TabsPage {
 
   }
 
+  fixedPreviousTab(trimHistory: boolean = true): Tab {
+    // walk backwards through the tab selection history
+    // and find the first previous tab that is enabled and shown
+    for (let i = this.ionTabs._selectHistory.length - 1; i >= 0; i--) {
+      const tab = this.ionTabs._tabs.find(t => t.id === this.ionTabs._selectHistory[i]);
+      if (tab && tab.enabled && tab.show) {
+        if (trimHistory) {
+          this.ionTabs._selectHistory.splice(i + 1);
+        }
+        return tab;
+      }
+    }
+
+    return null;
+  }
+
   tabChanged() {
-    const previousTab = this.ionTabs.previousTab();
-    console.log('previousTab =', previousTab && previousTab.root.name);
+    // Note: keep trimHistory=false for this test
+    const previousTab = this.ionTabs.previousTab(false);
+    const realPreviousTab = this.fixedPreviousTab(false);
+    console.log('previousTab() says', previousTab && previousTab.root.name, 'but it should say', realPreviousTab && realPreviousTab.root.name);
   }
 
 }
